@@ -29,6 +29,7 @@ func main() {
 }
 
 func handle(connect net.Conn) {
+	log.Printf("connect open local: %s, remote %s", connect.LocalAddr(), connect.RemoteAddr())
 	scanner := bufio.NewScanner(connect)
 	for scanner.Scan() {
 		data := scanner.Text()
@@ -37,4 +38,5 @@ func handle(connect net.Conn) {
 	if err := scanner.Err(); err != nil {
 		log.Println(err)
 	}
+	log.Printf("connect close local: %s, remote %s", connect.LocalAddr(), connect.RemoteAddr())
 }
