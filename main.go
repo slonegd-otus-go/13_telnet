@@ -8,7 +8,9 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -22,6 +24,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	cancelC := make(chan os.Signal)
+	signal.Notify(cancelC, syscall.SIGINT)
+
+	go func() {
+		<-cancelC
+		log.Println("cancel by interrupt signal")
+		cancel()
+	}()
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -37,17 +48,15 @@ func main() {
 
 	wg.Wait()
 	connect.Close()
-
-	unused(cancel)
 }
 
 type scanner struct {
 	reader io.Reader
-	text   chan (string)
+	text   chan string
 }
 
 func newScanner(reader io.Reader) scanner {
-	return scanner{reader, make(chan (string))}
+	return scanner{reader, make(chan string)}
 }
 
 func (s scanner) Run() {
